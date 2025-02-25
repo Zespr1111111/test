@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>10以内加减法练习</title>
+    <style>
+        :root {
+            --correct-color: #dfffdf;
+            --wrong-color: #ffe5e5;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        h2 {
+            color: #1a1a1a;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #quiz {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        .question {
+            display: grid;
+            grid-template-columns: 30px auto 80px;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        input {
+            width: 70px;
+            height: 40px;
+            font-size: 18px;
+            border: 2px solid #007AFF;
+            border-radius: 8px;
+            text-align: center;
+            -webkit-appearance: none;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #007AFF, #0063CC);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 500;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,122,255,0.2);
+            transition: transform 0.1s;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        #result {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+        @media (max-width: 375px) {
+            .question { grid-template-columns: 25px auto 70px; }
+            input { width: 60px; height: 36px; }
+        }
+    </style>
+</head>
+<body>
+    <h2>10以内加减法练习</h2>
+    <div id="quiz"></div>
+    <button onclick="checkAnswers()">检查答案</button>
+    <div id="result"></div>
+
+<script>
+// 初始化题目数组
+let questions = [];
+
+function generateQuestion() {
+    let a = Math.floor(Math.random() * 10);
+    let b = Math.floor(Math.random() * 10);
+    const op = Math.random() > 0.5 ? '+' : '-';
+    
+    // 确保减法结果不为负数[6](@ref)
+    if (op === '-' && a < b) [a, b] = [b, a];
+    
+    return { a, b, op };
+}
+
+function createQuiz() {
+    const quizDiv = document.getElementById('quiz');
+    if (!quizDiv) {
+        console.error('题目容器未找到');
+        return;
+    }
+
+    questions = [];
+    let htmlContent = '';
+    
+    for(let i=1; i<=10; i++) {
+        const question = generateQuestion();
+        questions.push(question);
+        htmlContent += `
+            <div class="question">
+                <span>${i}.</span>
+                <span>${question.a} ${question.op} ${question.b} =</span>
+                <input type="number" 
+                       min="0" 
+                       max="10" 
+                       id="q${i}"
+                       inputmode="numeric"
+                       pattern="[0-9]*">
+            </div>
+        `;
+    }
+    quizDiv.innerHTML = htmlContent;
+}
+
+function validateInput(value) {
+    return Number.isInteger(value) && value >= 0 && value <= 10;
+}
+
+function checkAnswers() {
+    let correct = 0;
+    const resultDiv = document.getElementById('result');
+    
+    questions.forEach((q, index) => {
+        const input = document.getElementById(`q${index+1}`);
+        const userAnswer = parseInt(input.value);
+        
+        if (!validateInput(userAnswer)) {
+            input.style.backgroundColor = 'var(--wrong-color)';
+            return;
+        }
+
+        const correctAnswer = q.op === '+' ? q.a + q.b : q.a - q.b;
+        
+        if (userAnswer === correctAnswer) {
+            correct++;
+            input.style.backgroundColor = 'var(--correct-color)';
+        } else {
+            input.style.backgroundColor = 'var(--wrong-color)';
+        }
+    });
+
+    const emoji = correct >=8 ? '🎉' : correct >=5 ? '👍' : '💪';
+    resultDiv.innerHTML = `
+        <h3>成绩：${correct}/10 ${emoji}</h3>
+        <p>${correct >=8 ? '太棒了！继续保持！' 
+            : correct >=5 ? '不错哦，再检查看看' 
+            : '再加把劲，你可以的！'}</p>
+    `;
+}
+
+// 初始化[7](@ref)
+document.addEventListener('DOMContentLoaded', () => {
+    createQuiz();
+    // 自动聚焦第一个输入框
+    const firstInput = document.getElementById('q1');
+    if (firstInput) firstInput.focus();
+});
+</script>
+</body>
+</html>
